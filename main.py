@@ -37,9 +37,20 @@ for dev in con.list_devices(subsystem='usb'):
 #print [x for x in[y.device_path for y in slot_devices] if x.startswith('/devices/pci0000:00/0000:00:1d.7/usb2/2-1/2-1.2/')]
 cp  = commonprefix([x.sys_path for x in slot_devices])
 for each in slot_devices:
-    new =  re.sub(cp,'', each.sys_path)
-    if new.startswith('1'):
-        print new, each.get('ID_SERIAL_SHORT')
-        for x in each.iteritems():
-            print x
-    print '\n'
+    suffix =  re.sub(cp,'', each.sys_path)
+    for idx, hub in enumerate(cdc_devices):
+        # USB devices are 1 indexed
+        hub_idx = idx + 1
+        if suffix.startswith(str(hub_idx)) and not suffix.endswith('0'):
+            if len(re.findall('/', suffix)) > 1:
+                slot_idx = int(suffix[-1]) + 6
+            else:
+                # Slot 1 == logical slot 2 so we minus one
+                # Slot 1 is the parent of the CDC device and the last 4 slots of a hub
+                slot_idx = int(suffix[-1]) -1
+
+            serial = each.get('ID_SERIAL_SHORT')
+
+            if serial:
+                print 'Hub: {0}   Slot: {1}   Device: {2}    Suffix: {3}'.format(hub_idx, slot_idx, serial, suffix)
+
