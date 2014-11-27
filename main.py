@@ -40,3 +40,6 @@ for each in slot_devices:
     new =  re.sub(cp,'', each.sys_path)
     if new.startswith('1'):
         print new, each.get('ID_SERIAL_SHORT')
+        for x in each.iteritems():
+            print x
+    print '\n'
